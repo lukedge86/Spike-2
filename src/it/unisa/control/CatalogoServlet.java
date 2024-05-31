@@ -20,68 +20,76 @@ public class CatalogoServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	        throws ServletException, IOException {
 
-		ProdottoDao prodDao = new ProdottoDao();
-		ProdottoBean bean = new ProdottoBean();
-		String sort = request.getParameter("sort");
-		String action = request.getParameter("action");
-		String redirectedPage = request.getParameter("page");;
-	
-		try {
-			if(action!=null) {
-				if(action.equalsIgnoreCase("add")) {
-					bean.setNome(request.getParameter("nome"));
-					bean.setDescrizione(request.getParameter("descrizione"));
-					bean.setIva(request.getParameter("iva"));
-					bean.setPrezzo(Double.parseDouble(request.getParameter("prezzo")));
-					bean.setQuantità(Integer.parseInt(request.getParameter("quantità")));
-					bean.setPiattaforma(request.getParameter("piattaforma"));
-					bean.setGenere(request.getParameter("genere"));
-					bean.setImmagine(request.getParameter("img"));
-					bean.setDataUscita(request.getParameter("dataUscita"));
-					bean.setDescrizioneDettagliata(request.getParameter("descDett"));
-					bean.setInVendita(true);
-					prodDao.doSave(bean);
-				}
-				
-				else if(action.equalsIgnoreCase("modifica")) {
-					
-					bean.setIdProdotto(Integer.parseInt(request.getParameter("id")));
-					bean.setNome(request.getParameter("nome"));
-					bean.setDescrizione(request.getParameter("descrizione"));
-					bean.setIva(request.getParameter("iva"));
-					bean.setPrezzo(Double.parseDouble(request.getParameter("prezzo")));
-					bean.setQuantità(Integer.parseInt(request.getParameter("quantità")));
-					bean.setPiattaforma(request.getParameter("piattaforma"));
-					bean.setGenere(request.getParameter("genere"));
-					bean.setImmagine(request.getParameter("img"));
-					bean.setDataUscita(request.getParameter("dataUscita"));
-					bean.setDescrizioneDettagliata(request.getParameter("descDett"));
-					bean.setInVendita(true);
-					prodDao.doUpdate(bean);	
-				}
+	    ProdottoDao prodDao = new ProdottoDao();
+	    ProdottoBean bean = new ProdottoBean();
+	    String sort = sanitize(request.getParameter("sort"));
+	    String action = sanitize(request.getParameter("action"));
+	    String redirectedPage = sanitize(request.getParameter("page"));
 
-				request.getSession().removeAttribute("categorie");
+	    try {
+	        if (action != null) {
+	            if (action.equalsIgnoreCase("add")) {
+	                bean.setNome(sanitize(request.getParameter("nome")));
+	                bean.setDescrizione(sanitize(request.getParameter("descrizione")));
+	                bean.setIva(sanitize(request.getParameter("iva")));
+	                bean.setPrezzo(Double.parseDouble(sanitize(request.getParameter("prezzo"))));
+	                bean.setQuantità(Integer.parseInt(sanitize(request.getParameter("quantità"))));
+	                bean.setPiattaforma(sanitize(request.getParameter("piattaforma")));
+	                bean.setGenere(sanitize(request.getParameter("genere")));
+	                bean.setImmagine(sanitize(request.getParameter("img")));
+	                bean.setDataUscita(sanitize(request.getParameter("dataUscita")));
+	                bean.setDescrizioneDettagliata(sanitize(request.getParameter("descDett")));
+	                bean.setInVendita(true);
+	                prodDao.doSave(bean);
+	            } else if (action.equalsIgnoreCase("modifica")) {
+	                bean.setIdProdotto(Integer.parseInt(sanitize(request.getParameter("id"))));
+	                bean.setNome(sanitize(request.getParameter("nome")));
+	                bean.setDescrizione(sanitize(request.getParameter("descrizione")));
+	                bean.setIva(sanitize(request.getParameter("iva")));
+	                bean.setPrezzo(Double.parseDouble(sanitize(request.getParameter("prezzo"))));
+	                bean.setQuantità(Integer.parseInt(sanitize(request.getParameter("quantità"))));
+	                bean.setPiattaforma(sanitize(request.getParameter("piattaforma")));
+	                bean.setGenere(sanitize(request.getParameter("genere")));
+	                bean.setImmagine(sanitize(request.getParameter("img")));
+	                bean.setDataUscita(sanitize(request.getParameter("dataUscita")));
+	                bean.setDescrizioneDettagliata(sanitize(request.getParameter("descDett")));
+	                bean.setInVendita(true);
+	                prodDao.doUpdate(bean);
+	            }
 
-			}
-			
-		} catch (SQLException e) {
-			System.out.println("Error:" + e.getMessage());
-		}
+	            request.getSession().removeAttribute("categorie");
+	        }
 
+	    } catch (SQLException e) {
+	        System.out.println("Error:" + e.getMessage());
+	    }
 
-		try {
-			request.getSession().removeAttribute("products");
-			request.getSession().setAttribute("products", prodDao.doRetrieveAll(sort));
-		} catch (SQLException e) {
-			System.out.println("Error:" + e.getMessage());
-		}
-		
-			
-			response.sendRedirect(request.getContextPath() + "/" +redirectedPage);
-		
-		
+	    try {
+	        request.getSession().removeAttribute("products");
+	        request.getSession().setAttribute("products", prodDao.doRetrieveAll(sort));
+	    } catch (SQLException e) {
+	        System.out.println("Error:" + e.getMessage());
+	    }
+
+	    response.sendRedirect(request.getContextPath() + "/" + redirectedPage);
+	}
+
+	// Funzione di sanificazione manuale per evitare XSS
+	private String sanitize(String input) {
+	    if (input == null) {
+	        return null;
+	    }
+	    // Sostituisce i caratteri speciali HTML con le loro entità HTML
+	    String sanitized = input;
+	    sanitized = sanitized.replace("&", "&amp;");
+	    sanitized = sanitized.replace("<", "&lt;");
+	    sanitized = sanitized.replace(">", "&gt;");
+	    sanitized = sanitized.replace("\"", "&quot;");
+	    sanitized = sanitized.replace("'", "&#x27;");
+	    sanitized = sanitized.replace("/", "&#x2F;");
+	    return sanitized;
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)

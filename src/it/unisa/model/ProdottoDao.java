@@ -158,17 +158,15 @@ public class ProdottoDao implements ProdottoDaoInterfaccia{
 
 	    if (order != null) {
 	    	order = order.replaceAll("[^a-zA-Z0-9_]", ""); // Rimuove eventuali caratteri pericolosi
-	        selectSQL += " ORDER BY ?";
-	    }else {
-	    	selectSQL = null;
+	        selectSQL += " ORDER BY " + order ;
 	    }
 
 		try {
 			connection = ds.getConnection();
 			preparedStatement = connection.prepareStatement(selectSQL);
-
+			
 			ResultSet rs = preparedStatement.executeQuery();
-			preparedStatement.setString(1, order);
+			
 
 
 			while (rs.next()) {
