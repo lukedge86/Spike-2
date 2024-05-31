@@ -1,6 +1,7 @@
 package it.unisa.control;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -34,7 +35,17 @@ public class RegistrazioneServlet extends HttpServlet {
 		String email = request.getParameter("email");
 		String dataNascita = request.getParameter("nascita");
 		String username = request.getParameter("us");
-		String pwd = request.getParameter("pw");
+			String pwd ="";
+			try {
+				pwd = LoginServlet.hashPassword(request.getParameter("pw"));
+			} catch (NoSuchAlgorithmException e) {
+				System.out.println("errore");
+			}
+
+			if(pwd.equals("")) {
+				response.sendRedirect(request.getContextPath() + "/errore.jsp");
+
+			}
 
         String[] parti = dataNascita.split("-");
         dataNascita = parti[2] + "-" + parti[1] + "-" + parti[0];
@@ -61,5 +72,7 @@ public class RegistrazioneServlet extends HttpServlet {
 		response.sendRedirect(request.getContextPath() + "/Home.jsp");
 
 	}
+	
+	
 
 }
