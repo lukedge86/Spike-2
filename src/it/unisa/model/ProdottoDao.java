@@ -5,8 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -152,16 +154,22 @@ public class ProdottoDao implements ProdottoDaoInterfaccia{
 		ArrayList<ProdottoBean> products = new ArrayList<ProdottoBean>();
 
 		String selectSQL = "SELECT * FROM " + ProdottoDao.TABLE_NAME;
+	
 
-		if (order != null && !order.equals("")) {
-			selectSQL += " ORDER BY " + order;
-		}
+	    if (order != null) {
+	    	order = order.replaceAll("[^a-zA-Z0-9_]", ""); // Rimuove eventuali caratteri pericolosi
+	        selectSQL += " ORDER BY ?";
+	    }else {
+	    	selectSQL = null;
+	    }
 
 		try {
 			connection = ds.getConnection();
 			preparedStatement = connection.prepareStatement(selectSQL);
 
 			ResultSet rs = preparedStatement.executeQuery();
+			preparedStatement.setString(1, order);
+
 
 			while (rs.next()) {
 				ProdottoBean bean = new ProdottoBean();
